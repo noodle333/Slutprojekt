@@ -2,10 +2,11 @@
 using Raylib_cs;
 using System.Numerics;
 using System.Timers;
+using System.Collections.Generic;
 
 namespace slutprojektet
 {
-    class Program   //TODO: PLAYER SHOOTING, ENEMY COLLISION, ENEMY SHOOTING, PLAYER COLLISION, GAMEOVER, NEXT LEVEL, RANDOM ENEMY SKINS (CASE SWITCH?), UNLOCKABLE PLAYER SKINS
+    class Program   //TODO: ENEMY SHOOTING, PLAYER COLLISION, GAMEOVER, NEXT LEVEL, RANDOM ENEMY SKINS (CASE SWITCH?), UNLOCKABLE PLAYER SKINS
     {
         static void Main(string[] args)
         {
@@ -19,7 +20,16 @@ namespace slutprojektet
             Color startColor = Color.BLACK;
             Color optionsColor = Color.BLACK;
             Color exitColor = Color.BLACK;
-
+            //ENEMY VALUES
+            List<Enemy> enemies = new List<Enemy>();
+            //ADD ENEMIES FOR EACH ROW AND FOREACH COLUMN
+            for (int i = 0; i < 3; i++)
+            {
+                for (int j = 0; j < 10; j++)
+                {
+                    enemies.Add(new Enemy(j*80+20, i*80+40));
+                }
+            }
             //PLAY VALUES
             float playerX = 492;
             float playerY = 708;
@@ -42,11 +52,11 @@ namespace slutprojektet
                     //GET MENUTARGET METHOD
                     menuTarget = MenuTarget(menuTarget);
 
-                    //MENU LOGIC 
+                    //MENU LOGIC (SÄTT IN I EN METOD SENARE)
                     if (menuTarget == 1)
                     {
                         startColor = Color.WHITE;
-                        if (Raylib.IsKeyPressed(KeyboardKey.KEY_SPACE) || Raylib.IsKeyPressed(KeyboardKey.KEY_ENTER))
+                        if (EnterOrSpaceCheck() == true)
                         {
                             gameState = "game";        
                         }
@@ -59,7 +69,7 @@ namespace slutprojektet
                     if (menuTarget == 2)
                     {
                         optionsColor = Color.WHITE;
-                        if (Raylib.IsKeyPressed(KeyboardKey.KEY_SPACE) || Raylib.IsKeyPressed(KeyboardKey.KEY_ENTER))
+                        if (EnterOrSpaceCheck() == true)
                         {
                             gameState = "options";        
                         }
@@ -72,7 +82,7 @@ namespace slutprojektet
                     if (menuTarget == 3)
                     {
                         exitColor = Color.WHITE;
-                        if (Raylib.IsKeyPressed(KeyboardKey.KEY_SPACE) || Raylib.IsKeyPressed(KeyboardKey.KEY_ENTER))
+                        if (EnterOrSpaceCheck() == true)
                         {
                             break;        
                         }
@@ -82,7 +92,7 @@ namespace slutprojektet
                         exitColor = Color.BLACK;
                     }
 
-                    //MENU GRAPHIC
+                    //MENU GRAPHIC //SÄTT IN I EN LOOP SENARE
                     Raylib.BeginDrawing();
                     Raylib.ClearBackground(Color.BLACK);
                     Raylib.DrawText("SPACE INVADERS", 200, 100, 48, Color.WHITE);
@@ -97,36 +107,21 @@ namespace slutprojektet
 
                 while(gameState == "game")
                 {
-                    //GET ENEMY CLASS
-                    Enemy enemy = new Enemy(); 
-                    Rectangle enemyRec = new Rectangle(200, 200, 40, 40); //TRIAL
-
                     //MAKE PLAYER REC
                     Rectangle playerRec = new Rectangle(playerX, playerY, 40, 40);
-
                     //MAKE BULLET REC
-                    Rectangle bulletRec = new Rectangle(bulletX, bulletY, 5, 25);
-                    
-
-                    
+                    Rectangle bulletRec = new Rectangle(bulletX, bulletY, 5, 25);    
                     //MOVEMENT METOD
                     (float pX, float pSpeed) returnedMovement = PlayerMovement(playerX, playerSpeed);
                     playerX = returnedMovement.pX;
                     playerSpeed = returnedMovement.pSpeed;
 
-                    //GRAFIK
-                    Raylib.BeginDrawing();
-                    Raylib.ClearBackground(Color.BLACK);
-                    
-                    Raylib.DrawRectangleRec(playerRec, Color.RED);
-                    
-                    //enemy.DrawEnemies(); 
+                    for (int i = 0; i < enemies.Count; i++)
+                    {
+                        enemies[i].DrawEnemy();
+                    }
 
-                    //TRIAL TRIAL
-                    Raylib.DrawRectangleRec(enemyRec, Color.YELLOW);
-
-                    Raylib.EndDrawing();
-
+                    //BULLET LOGIC (LÄGG I EN METOD SENARE)
                     if (Raylib.IsKeyPressed(KeyboardKey.KEY_W) && readyToShoot == true)
                     {
                         readyToShoot = false;
@@ -144,14 +139,23 @@ namespace slutprojektet
                         bulletY = 700;
                     }
 
-                    if (Raylib.CheckCollisionRecs(enemyRec, bulletRec))
-                    {
-                        Raylib.DrawText("HIT!", 100, 100, 32, Color.WHITE);
-                    }
+                    //GRAFIK
+                    Raylib.BeginDrawing();
+                    Raylib.ClearBackground(Color.BLACK);
+                    //DRAW PLAYER
+                    Raylib.DrawRectangleRec(playerRec, Color.RED);
+                    Raylib.EndDrawing();
 
-                    //ENEMY AND PLAYER COLLISION
-                    //for (int i = 0; i < allEnemies; i++)
-                    //{ if (CheckCollisionRecs(player, enemy[i],) -> gameOver = true)}
+                    //COLLISION BULLET x ENEMY
+                    for (int i = 0; i < enemies.Count; i++)
+                    {
+                        Rectangle enemyRec = new Rectangle(enemies[i].x, enemies[i].y, enemies[i].width, enemies[i].height);
+                        if (Raylib.CheckCollisionRecs(bulletRec, enemyRec) && enemies[i].isDead == false)
+                        {
+                            enemies[i].isDead = true;
+                            bulletY = -40;
+                        }
+                    }
                 }
             }
         }
@@ -166,11 +170,12 @@ namespace slutprojektet
             {
                 pX += pSpeed;
             }
-        return (pX, pSpeed);
+            return (pX, pSpeed);
         }
 
         static int MenuTarget(int mnTarget)
         {
+            //MENU MOVEMENT LOGIC
             if (Raylib.IsKeyPressed(KeyboardKey.KEY_W) || Raylib.IsKeyPressed(KeyboardKey.KEY_UP))
             {
                 if (mnTarget == 1)
@@ -194,6 +199,17 @@ namespace slutprojektet
                 }
             }
             return mnTarget;
+        }
+        static bool EnterOrSpaceCheck()
+        {
+            if (Raylib.IsKeyPressed(KeyboardKey.KEY_ENTER) || Raylib.IsKeyPressed(KeyboardKey.KEY_SPACE))
+            {
+                return true;
+            }
+            else
+            {
+                return false;
+            }
         }
     }
 }

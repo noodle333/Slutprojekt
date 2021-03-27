@@ -6,31 +6,22 @@ namespace slutprojektet
     public class Enemy
     {
         public int width, height;
-        public int column, row;
-        public int x, y, gap;
+        public int x, y;
+        public bool isDead = false;
 
-        public Enemy()
+        public Enemy(int tempX, int tempY)
         {
             width = 40;
             height = 40;
-            column = 16;
-            row = 3;
-            x = 40;
-            y = 40;
-            gap = 20;
+            x = tempX;
+            y = tempY;
         }
-        public void DrawEnemies()
+        public void DrawEnemy()
         {
-            for (int i = 0; i < row; i++)
-            {
-                for (int j = 0; j < column; j++)
-                {
-                    Raylib.DrawRectangle(x, y, width, height, Color.GREEN);
-                    x += gap + width;
-                }
-                y += gap + height;
-                x = 40;
-            }
+           if (isDead == false)
+           {
+               Raylib.DrawRectangle(x, y, width, height, Color.RED);
+           }
         }
     }
 }
