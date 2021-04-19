@@ -20,6 +20,7 @@ namespace slutprojektet
             Color startColor = Color.BLACK;
             Color optionsColor = Color.BLACK;
             Color exitColor = Color.BLACK;
+
             //ENEMY VALUES
             List<Enemy> enemies = new List<Enemy>();
             //ADD ENEMIES FOR EACH ROW AND FOREACH COLUMN
@@ -120,6 +121,11 @@ namespace slutprojektet
                     {
                         enemies[i].DrawEnemy();
                     }
+                    //MOVE ALL ENEMIES 
+                    for (int i = 0; i < enemies.Count; i++)
+                    {
+                        enemies[i].UpdateEnemy(); 
+                    }  
 
                     //BULLET LOGIC (LÄGG I EN METOD SENARE)
                     if (Raylib.IsKeyPressed(KeyboardKey.KEY_W) && readyToShoot == true)
@@ -139,14 +145,7 @@ namespace slutprojektet
                         bulletY = 700;
                     }
 
-                    //GRAFIK
-                    Raylib.BeginDrawing();
-                    Raylib.ClearBackground(Color.BLACK);
-                    //DRAW PLAYER
-                    Raylib.DrawRectangleRec(playerRec, Color.RED);
-                    Raylib.EndDrawing();
-
-                    //COLLISION BULLET x ENEMY
+                    //COLLISION BETWEEN BULLET AND ENEMY
                     for (int i = 0; i < enemies.Count; i++)
                     {
                         Rectangle enemyRec = new Rectangle(enemies[i].x, enemies[i].y, enemies[i].width, enemies[i].height);
@@ -156,17 +155,53 @@ namespace slutprojektet
                             bulletY = -40;
                         }
                     }
+
+                    //GET MAX AND MIN X FROM LIVING ENEMIES
+                    float maxX = 0;
+                    for (int i = 0; i < enemies.Count; i++)
+                    {
+                        if (enemies[i].x > maxX && enemies[i].isDead == false)
+                        {
+                            maxX = enemies[i].x;
+                        }
+                    }
+                    float minX = 1024;
+                    for (int i = 0; i < enemies.Count; i++)
+                    {
+                        if (enemies[i].x < minX && enemies[i].isDead == false)
+                        {
+                            minX = enemies[i].x;
+                        }
+                        
+                    }
+                    //MOVE ENEMY BLOCK DOWN AND CHANGE DIR
+                    if (maxX > 970 || minX < 10)
+                    {
+                        for (int i = 0; i < enemies.Count; i++)
+                        {
+                            enemies[i].y += 80;
+                            enemies[i].direction = -enemies[i].direction;
+                        }
+                    }
+
+                    //GRAFIK
+                    Raylib.BeginDrawing();
+                    Raylib.ClearBackground(Color.BLACK);
+                    //DRAW PLAYER
+                    Raylib.DrawRectangleRec(playerRec, Color.RED);
+                    Raylib.EndDrawing();
+
                 }
             }
         }
         static (float, float) PlayerMovement(float pX, float pSpeed)
         {
             //KEY MOVEMENT && COLLISION CHECK AGAINST WINDOW
-            if (Raylib.IsKeyDown(KeyboardKey.KEY_A) && pX > 0)
+            if (Raylib.IsKeyDown(KeyboardKey.KEY_A) && pX > 2)
             {
                 pX -= pSpeed;
             }
-            if (Raylib.IsKeyDown(KeyboardKey.KEY_D) && pX < 984)
+            if (Raylib.IsKeyDown(KeyboardKey.KEY_D) && pX < 982)
             {
                 pX += pSpeed;
             }
@@ -200,6 +235,7 @@ namespace slutprojektet
             }
             return mnTarget;
         }
+        
         static bool EnterOrSpaceCheck()
         {
             if (Raylib.IsKeyPressed(KeyboardKey.KEY_ENTER) || Raylib.IsKeyPressed(KeyboardKey.KEY_SPACE))
