@@ -26,7 +26,7 @@ namespace slutprojektet
         }
         public void UpdateEnemy()
         {
-            x += 0.5f * direction;
+            x += 0.3f * direction;
         }
     }
 }

@@ -41,6 +41,11 @@ namespace slutprojektet
             float bulletX = 0;
             float bulletY = 700;
 
+            //ENEMY SHOOTING
+            int enemyBulletX = 0;
+            int enemyBulletY = 0;
+            bool enemyShooting = false;
+
 
             //SCREEN VALUES
             Raylib.InitWindow(screenWidth, screenHeight, "Space Invaders");
@@ -110,6 +115,7 @@ namespace slutprojektet
                 {
                     //MAKE PLAYER REC
                     Rectangle playerRec = new Rectangle(playerX, playerY, 40, 40);
+                    
                     //MAKE BULLET REC
                     Rectangle bulletRec = new Rectangle(bulletX, bulletY, 5, 25);    
                     //MOVEMENT METOD
@@ -175,7 +181,7 @@ namespace slutprojektet
                         
                     }
                     //MOVE ENEMY BLOCK DOWN AND CHANGE DIR
-                    if (maxX > 970 || minX < 10)
+                    if (maxX > 974 || minX < 10)
                     {
                         for (int i = 0; i < enemies.Count; i++)
                         {
@@ -184,11 +190,45 @@ namespace slutprojektet
                         }
                     }
 
+                    //ENEMY RANDOM SHOOTING
+                    int count = enemies.Count;
+                    Random generator = new Random();
+
+                    int enemy = generator.Next(count);
+
+                    //THIS ONE RIGHT HERE CRASHES THE ENTIRE PROGRAM IF YOU WIN MAYBE YOU SHOULD WORK ON FIXING THAT BEFORE TURNING THIS STUFF IN
+                    while (enemies[enemy].isDead == true)
+                    {
+                        enemy = generator.Next(count);
+                    }
+                
+                    if (enemyShooting == false)
+                    {
+                        enemyBulletX = (int)enemies[enemy].x + 20;
+                        enemyBulletY = (int)enemies[enemy].y + 40;
+                        enemyShooting = true;
+                    }
+
+                    if (enemyShooting == true)
+                    {
+                        enemyBulletY += 5;
+                    }
+
+                    if (enemyBulletY > 1800)
+                    {
+                        enemyShooting = false;
+                    }
+                    
+
+        
+
                     //GRAFIK
                     Raylib.BeginDrawing();
                     Raylib.ClearBackground(Color.BLACK);
                     //DRAW PLAYER
                     Raylib.DrawRectangleRec(playerRec, Color.RED);
+                    //DRAW ENEMY BULLET
+                    Raylib.DrawRectangle(enemyBulletX, enemyBulletY, 5, 20, Color.GREEN);
                     Raylib.EndDrawing();
 
                 }
