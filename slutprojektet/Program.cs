@@ -24,6 +24,7 @@ namespace slutprojektet
             //ENEMY VALUES
             List<Enemy> enemies = new List<Enemy>();
             //ADD ENEMIES FOR EACH ROW AND FOREACH COLUMN
+
             for (int i = 0; i < 3; i++)
             {
                 for (int j = 0; j < 10; j++)
@@ -45,7 +46,6 @@ namespace slutprojektet
             int enemyBulletX = 0;
             int enemyBulletY = 0;
             bool enemyShooting = false;
-
 
             //SCREEN VALUES
             Raylib.InitWindow(screenWidth, screenHeight, "Space Invaders");
@@ -123,6 +123,7 @@ namespace slutprojektet
                     playerX = returnedMovement.pX;
                     playerSpeed = returnedMovement.pSpeed;
 
+                    //DRAW ALL ENEMIES
                     for (int i = 0; i < enemies.Count; i++)
                     {
                         enemies[i].DrawEnemy();
@@ -133,14 +134,13 @@ namespace slutprojektet
                         enemies[i].UpdateEnemy(); 
                     }  
 
-                    //BULLET LOGIC (LÄGG I EN METOD SENARE)
+                    //BULLET LOGIC 
                     if (Raylib.IsKeyPressed(KeyboardKey.KEY_W) && readyToShoot == true)
                     {
-                        readyToShoot = false;
                         bulletX = playerX + 15;
+                        readyToShoot = false;
                     }
-
-                    if (readyToShoot == false && bulletY > -500)
+                    else if (readyToShoot == false && bulletY > -500)
                     {
                         Raylib.DrawRectangleRec(bulletRec, Color.RED);
                         bulletY -= 15;
@@ -164,22 +164,20 @@ namespace slutprojektet
 
                     //GET MAX AND MIN X FROM LIVING ENEMIES
                     float maxX = 0;
+                    float minX = 1024;
                     for (int i = 0; i < enemies.Count; i++)
                     {
                         if (enemies[i].x > maxX && enemies[i].isDead == false)
                         {
                             maxX = enemies[i].x;
                         }
-                    }
-                    float minX = 1024;
-                    for (int i = 0; i < enemies.Count; i++)
-                    {
                         if (enemies[i].x < minX && enemies[i].isDead == false)
                         {
                             minX = enemies[i].x;
                         }
-                        
                     }
+                    
+                    
                     //MOVE ENEMY BLOCK DOWN AND CHANGE DIR
                     if (maxX > 974 || minX < 10)
                     {
@@ -211,7 +209,7 @@ namespace slutprojektet
 
                     if (enemyShooting == true)
                     {
-                        enemyBulletY += 5;
+                        enemyBulletY += 10;
                     }
 
                     if (enemyBulletY > 1800)
