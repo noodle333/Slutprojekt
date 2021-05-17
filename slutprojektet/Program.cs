@@ -36,7 +36,6 @@ namespace slutprojektet
             List<Enemy> enemies = new List<Enemy>();
             //CREATE ALL ENEMIES METHOD
             CreateEnemies(enemies);
-            int enemiesAlive = enemies.Count;
 
             //ENEMY SHOOTING
             int enemyBulletX = 0;
@@ -118,7 +117,7 @@ namespace slutprojektet
                     minEnemyX = returnedEnemyMinMax.min;
                     maxEnemyX = returnedEnemyMinMax.max;
                     
-                    //MOVE ENEMY BLOCK DOWN AND CHANGE DIR
+                    //MOVE ENEMY BLOCK DOWN AND CHANGE DIR METHOD
                     (List<Enemy> enemyList, float min, float max) returnedEnemyVertMove = EnemyVerticalMove(enemies, minEnemyX, maxEnemyX);
                     enemies = returnedEnemyVertMove.enemyList;
 
@@ -126,54 +125,33 @@ namespace slutprojektet
                     Random generator = new Random();
                     int enemy = generator.Next(enemies.Count);
 
-                    //COUNT DEAD ENEMIES
+                    //RESET COUNT EVERY FRAME
                     int count = 0;
-                    for (int i = 0; i < enemies.Count; i++)
-                    {
-                        if (enemies[i].isDead == true)
-                        {
-                            count++;
-                        }
-                    }
 
-                    //THIS ONE RIGHT HERE CRASHES THE ENTIRE PROGRAM IF YOU WIN MAYBE YOU SHOULD WORK ON FIXING THAT BEFORE TURNING THIS STUFF IN
+                    //COUNT DEAD ENEMIES METHOD
+                    (List<Enemy> enemyList, int c) returnedDeadEnemies = DeadEnemyCount(enemies, count);
+                    count = returnedDeadEnemies.c;
+
+                    //RE-RANDOMIZE IF ENEMY IS DEAD 
                     while (enemies[enemy].isDead == true && count < enemies.Count - 1)
                     {
                         enemy = generator.Next(enemies.Count);
                     }
                 
-                    if (enemyShooting == false && count < enemies.Count - 1)
-                    {
-                        enemyBulletX = (int)enemies[enemy].x + 20;
-                        enemyBulletY = (int)enemies[enemy].y + 40;
-                        enemyShooting = true;
-                    }
-
-                    if (enemyShooting == true)
-                    {
-                        enemyBulletY += 10;
-                    }
-
-                    if (enemyBulletY > 1800)
-                    {
-                        enemyShooting = false;
-                    }
+                    //ENEMY SHOOTING METHOD
+                    (List<Enemy> enemyList, bool eShoot, int c, int x, int y, int e) returnedEnemyShooting = EnemyShooting(enemies, enemyShooting, count, enemyBulletX, enemyBulletY, enemy);
+                    enemies = returnedEnemyShooting.enemyList;
+                    enemyShooting = returnedEnemyShooting.eShoot;
+                    count = returnedEnemyShooting.c;
+                    enemyBulletX = returnedEnemyShooting.x;
+                    enemyBulletY = returnedEnemyShooting.y;
+                    enemy = returnedEnemyShooting.e;
                     
                     //WHEN ONLY ONE ENEMY LEFT INCReASE ITS SPEED
-                    if (count == enemies.Count - 1)
-                    {
-                        //FIND THE LIVING ENEMY
-                        for (int i = 0; i < enemies.Count; i++)
-                        {
-                            if (enemies[i].isDead == false)
-                            {
-                                //INCReASE ITS SPEED IN APPROPRIATE DIRECTIon
-                                enemies[i].direction += 2;
-                            }
-                        }
-                        
-                    }
-
+                    (List<Enemy> enemyList, int c) returnedLastEnemy = LastEnemySpeedBoost(enemies, count);
+                    enemies = returnedLastEnemy.enemyList;
+                    count = returnedLastEnemy.c;
+                    
                     //GRAFIK
                     Raylib.BeginDrawing();
                     Raylib.ClearBackground(Color.BLACK);
@@ -363,7 +341,58 @@ namespace slutprojektet
             return (enemyList, min, max);
         }
 
-        static bool EnterOrSpaceChec_k()
+        static (List<Enemy>, int) DeadEnemyCount(List<Enemy> enemyList, int c)
+        {
+            for (int i = 0; i < enemyList.Count; i++)
+            {
+                if (enemyList[i].isDead == true)
+                {
+                    c++;
+                }
+            }
+            return (enemyList, c);
+        }
+
+        static (List<Enemy>, bool, int, int, int, int) EnemyShooting(List<Enemy> enemyList, bool eShoot, int c, int x, int y, int e)
+        {
+            //CHECK SO ENEMIES ARE NOT CURRENTLY SHOOTING
+            if (eShoot == false && c < enemyList.Count - 1)
+            {
+                x = (int)enemyList[e].x + 20;
+                y = (int)enemyList[e].y + 40;
+                eShoot = true;
+            }
+            //MOVE BULLET
+            if (eShoot == true)
+            {
+                y += 10;
+            }
+            //CHECK WHEN BULLET OUT OF BOUNDS AND RESET
+            if (y > 1800)
+            {
+                eShoot = false;
+            }
+            return (enemyList, eShoot, c, x, y, e);
+        }
+
+        static (List<Enemy>, int) LastEnemySpeedBoost(List<Enemy> enemyList, int c)
+        {
+            if (c == enemyList.Count - 1)
+            {
+                //FIND THE LIVING ENEMY
+                for (int i = 0; i < enemyList.Count; i++)
+                {
+                    if (enemyList[i].isDead == false)
+                    {
+                        //INCReASE ITS SPEED IN APPROPRIATE DIRECTIon
+                        enemyList[i].direction += 2;
+                    }
+                }
+            }
+            return(enemyList, c);
+        }
+
+        static bool EnterOrSpaceCheck()
         {
             if (Raylib.IsKeyPressed(KeyboardKey.KEY_ENTER) || Raylib.IsKeyPressed(KeyboardKey.KEY_SPACE))
             {
