@@ -8,7 +8,7 @@ namespace slutprojektet
     {
         public int width, height;
         public float x, y;
-        public int direction = 2;
+        public int direction = 1;
         public bool isDead = false;
 
         private static Texture2D spaceInvaderOne = Raylib.LoadTexture("invader.png");
